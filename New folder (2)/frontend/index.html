@@ -295,12 +295,15 @@
         ];
 
         function randomOutcome() {
-          const roll = Math.random();
+          const totalProb = ballOutcomes.reduce((sum, outcome) => sum + outcome.prob, 0);
+          if (totalProb <= 0) return ballOutcomes[ballOutcomes.length - 1];
+          const roll = Math.random() * totalProb;
           let cursor = 0;
-          for (let i = 0; i < ballOutcomes.length; i++) {
-            cursor += ballOutcomes[i].prob;
-            if (roll < cursor || i === ballOutcomes.length - 1) return ballOutcomes[i];
+          for (const outcome of ballOutcomes) {
+            cursor += outcome.prob;
+            if (roll <= cursor) return outcome;
           }
+          return ballOutcomes[ballOutcomes.length - 1];
         }
 
         function randomTarget(balls) {
@@ -317,8 +320,9 @@
           ballsTotalEl.textContent = state.ballsTotal;
           const ballsLeft = state.ballsTotal - state.ballsUsed;
           const runsToWin = Math.max(0, state.target - state.runs);
-          rrEl.textContent =
+          const runRateText =
             ballsLeft > 0 && runsToWin > 0 ? (runsToWin / ballsLeft).toFixed(2) : "—";
+          rrEl.textContent = runRateText;
           statusEl.textContent = message;
 
           let badgeText = "Waiting";
@@ -344,18 +348,15 @@
 
         function addLogEntry(text, outcome) {
           const li = document.createElement("li");
-          const overSize = state.ballsTotal;
-          const currentIndex = Math.max(0, state.ballsUsed - 1);
-          const overNum = Math.floor(currentIndex / overSize);
-          const ballNum = (currentIndex % overSize) + 1;
-          const overText = `${overNum}.${ballNum}`;
+          const ballNum = state.ballsUsed;
+          const overText = `0.${ballNum}`;
           li.innerHTML = `<strong>${overText}</strong> <span>${text}</span>`;
           if (outcome === "Wicket!") {
             li.style.color = "var(--danger)";
           }
           logEl.prepend(li);
           while (logEl.children.length > 20) {
-            logEl.lastChild.remove();
+            logEl.removeChild(logEl.lastChild);
           }
         }
 
