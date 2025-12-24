@@ -328,7 +328,7 @@
           let badgeClass = "badge";
           if (state.inPlay) {
             badgeText = "In Play";
-          } else if (state.target && state.runs > state.target) {
+          } else if (state.target && state.runs >= state.target) {
             badgeText = "You Won";
           } else if (state.target && state.ballsUsed >= state.ballsTotal) {
             badgeText = "Innings Over";
@@ -336,7 +336,7 @@
           if (!state.inPlay && state.target && state.wickets >= state.maxWickets) {
             badgeText = "All Out";
             badgeClass += " danger";
-          } else if (!state.inPlay && state.target && state.runs <= state.target && state.ballsUsed >= state.ballsTotal) {
+          } else if (!state.inPlay && state.target && state.runs < state.target && state.ballsUsed >= state.ballsTotal) {
             badgeClass += " danger";
           }
           badgeEl.className = badgeClass;
