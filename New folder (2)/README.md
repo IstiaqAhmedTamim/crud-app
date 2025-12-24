@@ -1,11 +1,11 @@
 # crud-app 
 # Advance OOP Tests
 
-A basic full-stack app with Spring Boot backend and React TypeScript frontend.
+A basic Spring Boot backend with a static HTML/JavaScript cricket super-over frontend.
 
 ## Setup
 - Backend: Run `mvn spring-boot:run` in /backend
-- Frontend: Run `npm start` in /frontend
+- Frontend: Open `frontend/index.html` in a browser, or serve the `frontend` folder with a simple static server (e.g., `python -m http.server`).
 
 ## Devcontainer
 Uses Java 17 and Node 20 for Codespaces.
