@@ -317,8 +317,7 @@
           ballsUsedEl.textContent = state.ballsUsed;
           ballsTotalEl.textContent = state.ballsTotal;
           const ballsLeft = state.ballsTotal - state.ballsUsed;
-          const runsToWin =
-            state.runs > state.target ? 0 : Math.max(0, state.target - state.runs + 1);
+          const runsToWin = Math.max(0, state.target - state.runs);
           rrEl.textContent =
             state.inPlay && ballsLeft > 0
               ? (runsToWin / ballsLeft).toFixed(2)
@@ -411,32 +410,30 @@
             state.wickets += 1;
             addLogEntry("Wicket! Batter is out.", "Wicket!");
             if (state.wickets >= state.maxWickets) {
-              endMatch("All out! You fell short by " + Math.max(0, state.target - state.runs + 1) + " runs.");
+              endMatch("All out! You fell short by " + Math.max(0, state.target - state.runs) + " run(s).");
               return;
             }
           } else {
             state.runs += outcome.runs;
             addLogEntry(`${outcome.label} (${outcome.runs} run${outcome.runs === 1 ? "" : "s"})`);
-            if (state.runs > state.target) {
+            if (state.runs >= state.target) {
               endMatch("You chased it down with " + (state.ballsTotal - state.ballsUsed) + " ball(s) to spare!");
               return;
             }
           }
 
           if (state.ballsUsed >= state.ballsTotal) {
-            if (state.runs > state.target) {
+            if (state.runs >= state.target) {
               endMatch("You chased it down with 0 balls to spare!");
-            } else if (state.runs === state.target) {
-              endMatch("Scores level! It's a tie.");
             } else {
-              endMatch("Innings over. Needed " + Math.max(0, state.target - state.runs + 1) + " more run(s).");
+              endMatch("Innings over. Needed " + Math.max(0, state.target - state.runs) + " more run(s).");
             }
             return;
           }
 
           const msg = state.wickets > 0
-            ? `Need ${Math.max(0, state.target - state.runs + 1)} off ${state.ballsTotal - state.ballsUsed} with ${state.maxWickets - state.wickets} wicket(s) left.`
-            : `Need ${Math.max(0, state.target - state.runs + 1)} off ${state.ballsTotal - state.ballsUsed}.`;
+            ? `Need ${Math.max(0, state.target - state.runs)} off ${state.ballsTotal - state.ballsUsed} with ${state.maxWickets - state.wickets} wicket(s) left.`
+            : `Need ${Math.max(0, state.target - state.runs)} off ${state.ballsTotal - state.ballsUsed}.`;
           updateUI(msg);
         }
 
