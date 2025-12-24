@@ -3,10 +3,448 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>CRUD App</title>
+    <title>Cricket Super Over</title>
+    <style>
+      :root {
+        color-scheme: light dark;
+        --surface: #0b3d2e;
+        --panel: #0f5132;
+        --text: #f5f6f7;
+        --accent: #f0b90b;
+        --muted: #c7d1c7;
+        --danger: #f87171;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        min-height: 100vh;
+        font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
+        background: radial-gradient(circle at 20% 20%, #0f5132, #062a1c 50%),
+          radial-gradient(circle at 80% 0%, #0b3d2e, #041710 40%),
+          #082418;
+        color: var(--text);
+        display: grid;
+        place-items: center;
+        padding: 24px;
+      }
+      .card {
+        width: min(960px, 100%);
+        background: linear-gradient(145deg, rgba(14, 78, 52, 0.85), rgba(10, 50, 34, 0.92));
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 18px;
+        padding: 24px;
+        box-shadow: 0 30px 80px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+        backdrop-filter: blur(6px);
+      }
+      h1 {
+        margin: 0 0 12px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        letter-spacing: 0.4px;
+      }
+      h1 span {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 40px;
+        height: 40px;
+        border-radius: 12px;
+        background: rgba(240, 185, 11, 0.2);
+        color: var(--accent);
+        font-weight: 800;
+        font-size: 18px;
+      }
+      p.lead {
+        margin: 0 0 20px;
+        color: var(--muted);
+      }
+      .score-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+        gap: 12px;
+        margin: 16px 0 20px;
+      }
+      .score-tile {
+        background: rgba(0, 0, 0, 0.25);
+        border: 1px solid rgba(255, 255, 255, 0.06);
+        border-radius: 12px;
+        padding: 14px;
+        display: grid;
+        gap: 6px;
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+      }
+      .score-label {
+        font-size: 12px;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        color: var(--muted);
+      }
+      .score-value {
+        font-size: 26px;
+        font-weight: 800;
+        color: var(--accent);
+      }
+      .controls {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+        align-items: flex-end;
+        margin-bottom: 18px;
+      }
+      .field {
+        display: grid;
+        gap: 6px;
+      }
+      label {
+        color: var(--muted);
+        font-size: 13px;
+      }
+      input,
+      select,
+      button {
+        font: inherit;
+        border-radius: 10px;
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        padding: 10px 12px;
+        background: rgba(255, 255, 255, 0.06);
+        color: var(--text);
+        outline: none;
+      }
+      input:focus,
+      select:focus {
+        border-color: var(--accent);
+        box-shadow: 0 0 0 2px rgba(240, 185, 11, 0.25);
+      }
+      button {
+        cursor: pointer;
+        transition: transform 0.1s ease, box-shadow 0.2s ease;
+        background: linear-gradient(135deg, #f0b90b, #d49b00);
+        color: #0c0c0c;
+        border: none;
+        font-weight: 700;
+      }
+      button.secondary {
+        background: rgba(255, 255, 255, 0.08);
+        color: var(--text);
+        border: 1px solid rgba(255, 255, 255, 0.12);
+      }
+      button:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+        box-shadow: none;
+      }
+      button:not(:disabled):active {
+        transform: translateY(1px);
+      }
+      .status {
+        padding: 12px;
+        border-radius: 12px;
+        background: rgba(0, 0, 0, 0.2);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 14px;
+        color: var(--text);
+      }
+      .badge {
+        padding: 4px 10px;
+        border-radius: 999px;
+        font-size: 12px;
+        letter-spacing: 0.4px;
+        font-weight: 700;
+        color: #0b3d2e;
+        background: var(--accent);
+      }
+      .badge.danger {
+        background: var(--danger);
+        color: #1b0b0b;
+      }
+      ul.log {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+        display: grid;
+        gap: 8px;
+        max-height: 260px;
+        overflow: auto;
+      }
+      ul.log li {
+        background: rgba(0, 0, 0, 0.22);
+        border: 1px solid rgba(255, 255, 255, 0.06);
+        border-radius: 10px;
+        padding: 10px 12px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        color: var(--muted);
+      }
+      ul.log li strong {
+        color: var(--text);
+      }
+      @media (max-width: 600px) {
+        body {
+          padding: 12px;
+        }
+        .controls {
+          flex-direction: column;
+          align-items: stretch;
+        }
+      }
+    </style>
   </head>
   <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.tsx"></script>
+    <main class="card" aria-live="polite">
+      <h1><span>🏏</span> Cricket Super Over</h1>
+      <p class="lead">
+        Play a quick super-over chase. Set a target, send down balls, and see if you can win before running out of deliveries or wickets.
+      </p>
+
+      <div class="score-grid" role="status">
+        <div class="score-tile">
+          <div class="score-label">Target</div>
+          <div class="score-value" id="targetValue">—</div>
+        </div>
+        <div class="score-tile">
+          <div class="score-label">Score</div>
+          <div class="score-value"><span id="runsValue">0</span>/<span id="wicketsValue">0</span></div>
+        </div>
+        <div class="score-tile">
+          <div class="score-label">Balls</div>
+          <div class="score-value"><span id="ballsUsed">0</span>/<span id="ballsTotal">0</span></div>
+        </div>
+        <div class="score-tile">
+          <div class="score-label">Run Rate Needed</div>
+          <div class="score-value" id="rrValue">—</div>
+        </div>
+      </div>
+
+      <div class="controls">
+        <div class="field">
+          <label for="targetInput">Target (leave blank for random)</label>
+          <input id="targetInput" type="number" min="1" placeholder="e.g. 15" />
+        </div>
+        <div class="field">
+          <label for="ballsInput">Balls in super over</label>
+          <select id="ballsInput">
+            <option value="6">6 balls</option>
+            <option value="8">8 balls</option>
+            <option value="10">10 balls</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="wicketsInput">Wickets available</label>
+          <select id="wicketsInput">
+            <option value="2">2 wickets</option>
+            <option value="3">3 wickets</option>
+          </select>
+        </div>
+        <button id="startBtn" type="button">Start Match</button>
+        <button id="ballBtn" type="button" disabled>Play Ball</button>
+        <button id="resetBtn" class="secondary" type="button">Reset</button>
+      </div>
+
+      <div class="status">
+        <span class="badge" id="stateBadge">Waiting</span>
+        <div id="statusText">Set your target and press "Start Match".</div>
+      </div>
+
+      <ul class="log" id="log" aria-label="Ball-by-ball log"></ul>
+    </main>
+
+    <script>
+      (() => {
+        const targetEl = document.getElementById("targetValue");
+        const runsEl = document.getElementById("runsValue");
+        const wicketsEl = document.getElementById("wicketsValue");
+        const ballsUsedEl = document.getElementById("ballsUsed");
+        const ballsTotalEl = document.getElementById("ballsTotal");
+        const rrEl = document.getElementById("rrValue");
+        const statusEl = document.getElementById("statusText");
+        const badgeEl = document.getElementById("stateBadge");
+        const logEl = document.getElementById("log");
+
+        const targetInput = document.getElementById("targetInput");
+        const ballsInput = document.getElementById("ballsInput");
+        const wicketsInput = document.getElementById("wicketsInput");
+        const startBtn = document.getElementById("startBtn");
+        const ballBtn = document.getElementById("ballBtn");
+        const resetBtn = document.getElementById("resetBtn");
+
+        const state = {
+          target: 0,
+          runs: 0,
+          wickets: 0,
+          ballsUsed: 0,
+          ballsTotal: 6,
+          maxWickets: 2,
+          inPlay: false,
+        };
+
+        const ballOutcomes = [
+          { label: "Dot ball", runs: 0, prob: 0.18 },
+          { label: "Single", runs: 1, prob: 0.26 },
+          { label: "Double", runs: 2, prob: 0.16 },
+          { label: "Triple", runs: 3, prob: 0.04 },
+          { label: "Four!", runs: 4, prob: 0.16 },
+          { label: "Six!", runs: 6, prob: 0.08 },
+          { label: "Wicket!", wicket: true, prob: 0.12 },
+        ];
+
+        function randomOutcome() {
+          const roll = Math.random();
+          let cursor = 0;
+          for (const outcome of ballOutcomes) {
+            cursor += outcome.prob;
+            if (roll <= cursor) return outcome;
+          }
+          return ballOutcomes[ballOutcomes.length - 1];
+        }
+
+        function randomTarget(balls) {
+          const base = balls * 1.5;
+          const swing = Math.floor(Math.random() * (balls + 6));
+          return Math.max(6, Math.round(base + swing));
+        }
+
+        function updateUI(message) {
+          targetEl.textContent = state.target ? state.target : "—";
+          runsEl.textContent = state.runs;
+          wicketsEl.textContent = state.wickets;
+          ballsUsedEl.textContent = state.ballsUsed;
+          ballsTotalEl.textContent = state.ballsTotal;
+          const ballsLeft = state.ballsTotal - state.ballsUsed;
+          const runsNeeded = Math.max(0, state.target - state.runs + 1);
+          rrEl.textContent =
+            state.inPlay && ballsLeft > 0
+              ? (runsNeeded / ballsLeft).toFixed(2)
+              : "—";
+          statusEl.textContent = message;
+
+          let badgeText = "Waiting";
+          let badgeClass = "badge";
+          if (state.inPlay) {
+            badgeText = "In Play";
+          } else if (state.target && state.runs > state.target) {
+            badgeText = "You Won";
+          } else if (state.target && state.ballsUsed >= state.ballsTotal) {
+            badgeText = "Innings Over";
+          }
+          if (!state.inPlay && state.target && state.wickets >= state.maxWickets) {
+            badgeText = "All Out";
+            badgeClass += " danger";
+          } else if (!state.inPlay && state.target && state.runs <= state.target && state.ballsUsed >= state.ballsTotal) {
+            badgeClass += " danger";
+          }
+          badgeEl.className = badgeClass;
+          badgeEl.textContent = badgeText;
+
+          ballBtn.disabled = !state.inPlay;
+        }
+
+        function addLogEntry(text, outcome) {
+          const li = document.createElement("li");
+          const overNum = Math.floor(state.ballsUsed / 6);
+          const ballNum = (state.ballsUsed % 6) + 1;
+          const overText = `${overNum}.${ballNum}`;
+          li.innerHTML = `<strong>${overText}</strong> <span>${text}</span>`;
+          if (outcome === "Wicket!") {
+            li.style.color = "var(--danger)";
+          }
+          logEl.prepend(li);
+          while (logEl.children.length > 20) {
+            logEl.removeChild(logEl.lastChild);
+          }
+        }
+
+        function resetMatch() {
+          Object.assign(state, {
+            target: 0,
+            runs: 0,
+            wickets: 0,
+            ballsUsed: 0,
+            ballsTotal: 6,
+            maxWickets: 2,
+            inPlay: false,
+          });
+          logEl.innerHTML = "";
+          ballBtn.disabled = true;
+          updateUI('Set your target and press "Start Match".');
+        }
+
+        function startMatch() {
+          const balls = parseInt(ballsInput.value, 10) || 6;
+          const wickets = parseInt(wicketsInput.value, 10) || 2;
+          const targetValue = parseInt(targetInput.value, 10);
+          const targetScore = Number.isFinite(targetValue) && targetValue > 0 ? targetValue : randomTarget(balls);
+
+          Object.assign(state, {
+            target: targetScore,
+            runs: 0,
+            wickets: 0,
+            ballsUsed: 0,
+            ballsTotal: balls,
+            maxWickets: wickets,
+            inPlay: true,
+          });
+          logEl.innerHTML = "";
+          ballBtn.disabled = false;
+          updateUI("Chasing " + targetScore + ". Tap Play Ball to begin.");
+        }
+
+        function endMatch(message) {
+          state.inPlay = false;
+          ballBtn.disabled = true;
+          updateUI(message);
+        }
+
+        function playBall() {
+          if (!state.inPlay) return;
+          state.ballsUsed += 1;
+          const outcome = randomOutcome();
+
+          if (outcome.wicket) {
+            state.wickets += 1;
+            addLogEntry("Wicket! Batter is out.", "Wicket!");
+            if (state.wickets >= state.maxWickets) {
+              endMatch("All out! You fell short by " + Math.max(0, state.target - state.runs + 1) + " runs.");
+              return;
+            }
+          } else {
+            state.runs += outcome.runs;
+            addLogEntry(`${outcome.label} (${outcome.runs} run${outcome.runs === 1 ? "" : "s"})`);
+            if (state.runs > state.target) {
+              endMatch("You chased it down with " + (state.ballsTotal - state.ballsUsed) + " ball(s) to spare!");
+              return;
+            }
+          }
+
+          if (state.ballsUsed >= state.ballsTotal) {
+            if (state.runs > state.target) {
+              endMatch("You chased it down with 0 balls to spare!");
+            } else if (state.runs === state.target) {
+              endMatch("Scores level! It's a tie.");
+            } else {
+              endMatch("Innings over. Needed " + Math.max(0, state.target - state.runs + 1) + " more run(s).");
+            }
+            return;
+          }
+
+          const msg = state.wickets > 0
+            ? `Need ${Math.max(0, state.target - state.runs + 1)} off ${state.ballsTotal - state.ballsUsed} with ${state.maxWickets - state.wickets} wicket(s) left.`
+            : `Need ${Math.max(0, state.target - state.runs + 1)} off ${state.ballsTotal - state.ballsUsed}.`;
+          updateUI(msg);
+        }
+
+        startBtn.addEventListener("click", startMatch);
+        ballBtn.addEventListener("click", playBall);
+        resetBtn.addEventListener("click", resetMatch);
+
+        resetMatch();
+      })();
+    </script>
   </body>
 </html>
