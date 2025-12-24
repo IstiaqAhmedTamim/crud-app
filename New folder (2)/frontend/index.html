@@ -297,11 +297,10 @@
         function randomOutcome() {
           const roll = Math.random();
           let cursor = 0;
-          for (const outcome of ballOutcomes) {
-            cursor += outcome.prob;
-            if (roll < cursor) return outcome;
+          for (let i = 0; i < ballOutcomes.length; i++) {
+            cursor += ballOutcomes[i].prob;
+            if (roll < cursor || i === ballOutcomes.length - 1) return ballOutcomes[i];
           }
-          return ballOutcomes[ballOutcomes.length - 1];
         }
 
         function randomTarget(balls) {
@@ -319,9 +318,7 @@
           const ballsLeft = state.ballsTotal - state.ballsUsed;
           const runsToWin = Math.max(0, state.target - state.runs);
           rrEl.textContent =
-            state.inPlay && ballsLeft > 0
-              ? (runsToWin / ballsLeft).toFixed(2)
-              : "—";
+            ballsLeft > 0 && runsToWin > 0 ? (runsToWin / ballsLeft).toFixed(2) : "—";
           statusEl.textContent = message;
 
           let badgeText = "Waiting";
@@ -347,8 +344,10 @@
 
         function addLogEntry(text, outcome) {
           const li = document.createElement("li");
-          const overNum = Math.floor(state.ballsUsed / 6);
-          const ballNum = (state.ballsUsed % 6) + 1;
+          const overSize = state.ballsTotal;
+          const currentIndex = Math.max(0, state.ballsUsed - 1);
+          const overNum = Math.floor(currentIndex / overSize);
+          const ballNum = (currentIndex % overSize) + 1;
           const overText = `${overNum}.${ballNum}`;
           li.innerHTML = `<strong>${overText}</strong> <span>${text}</span>`;
           if (outcome === "Wicket!") {
@@ -356,7 +355,7 @@
           }
           logEl.prepend(li);
           while (logEl.children.length > 20) {
-            logEl.removeChild(logEl.lastChild);
+            logEl.lastChild.remove();
           }
         }
 
